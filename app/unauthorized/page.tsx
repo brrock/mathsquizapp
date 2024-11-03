@@ -15,7 +15,7 @@ export default function UnauthorizedPage() {
         </CardHeader>
         <CardContent className="text-center">
           <p className="mb-6 text-muted-foreground">
-            Your IP address is not authorized to access this area.
+            You are not authorized to access this area.
           </p>
           <Link href="/">
             <Button className="w-full">
