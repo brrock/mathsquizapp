@@ -6,8 +6,8 @@ import { Toaster } from '@/components/ui/toaster';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'QuizMaster - Test Your Knowledge',
-  description: 'An interactive quiz platform built with Next.js and shadcn/ui',
+  title: 'The maths quiz - Test Your Knowledge',
+  description: '',
 };
 
 export default function RootLayout({

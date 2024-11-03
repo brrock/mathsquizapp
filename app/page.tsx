@@ -12,10 +12,8 @@ export default function Home() {
             <div className="flex justify-center mb-4">
               <BrainCog className="h-12 w-12 text-primary" />
             </div>
-            <CardTitle className="text-4xl font-bold tracking-tight">Welcome to QuizMaster</CardTitle>
-            <CardDescription className="text-lg mt-2">
-              Test your knowledge with our interactive quiz platform
-            </CardDescription>
+            <CardTitle className="text-4xl font-bold tracking-tight">Welcome to The maths quiz</CardTitle>
+           
           </CardHeader>
           <CardContent className="flex flex-col gap-4 items-center">
             <Link href="/quiz" className="w-full max-w-xs">
