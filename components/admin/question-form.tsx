@@ -1,111 +1,161 @@
+// components/admin/question-form.tsx
 "use client";
 
-import { useState } from 'react';
-import { PlusCircle, MinusCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { ImageUpload } from "@/components/upload-button";
+import { X } from "lucide-react";
+
+const formSchema = z.object({
+  question: z.string().min(1, "Question is required"),
+  imageUrl: z.string().optional(),
+  options: z.array(z.string()).min(2, "At least 2 options are required"),
+  answer: z.number().min(0, "Please select the correct answer"),
+});
 
 interface QuestionFormProps {
-  onSuccess: () => void;
+  onSuccess?: () => void;
 }
 
 export function QuestionForm({ onSuccess }: QuestionFormProps) {
-  const [question, setQuestion] = useState('');
-  const [options, setOptions] = useState(['', '', '', '']);
-  const [correctAnswer, setCorrectAnswer] = useState<number | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      question: "",
+      imageUrl: "",
+      options: ["", ""],
+      answer: 0,
+    },
+  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!question || options.some(opt => !opt) || correctAnswer === null) {
-      return;
-    }
-
-    setIsSubmitting(true);
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const response = await fetch('/api/questions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          question,
-          options,
-          answer: correctAnswer,
-        }),
+      const response = await fetch("/api/questions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
       });
 
-      if (!response.ok) throw new Error('Failed to add question');
+      if (!response.ok) throw new Error("Failed to create question");
       
-      setQuestion('');
-      setOptions(['', '', '', '']);
-      setCorrectAnswer(null);
-      onSuccess();
+      form.reset();
+      onSuccess?.();
     } catch (error) {
-      console.error('Failed to add question:', error);
-    } finally {
-      setIsSubmitting(false);
+      console.error(error);
     }
-  };
-
-  const handleOptionChange = (index: number, value: string) => {
-    const newOptions = [...options];
-    newOptions[index] = value;
-    setOptions(newOptions);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="space-y-2">
-        <Label htmlFor="question">Question</Label>
-        <Input
-          id="question"
-          value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-          placeholder="Enter your question"
-          required
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="question"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Question</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
 
-      <div className="space-y-4">
-        <Label>Options</Label>
-        {options.map((option, index) => (
-          <div key={index} className="flex gap-2">
-            <Input
-              value={option}
-              onChange={(e) => handleOptionChange(index, e.target.value)}
-              placeholder={`Option ${index + 1}`}
-              required
+        <FormField
+          control={form.control}
+          name="imageUrl"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Question Image (Optional)</FormLabel>
+              <FormControl>
+                <ImageUpload 
+                  value={field.value} 
+                  onChange={field.onChange}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="space-y-4">
+          <FormLabel>Options</FormLabel>
+          {form.watch("options").map((_, index) => (
+            <FormField
+              key={index}
+              control={form.control}
+              name={`options.${index}`}
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex items-center gap-2">
+                    <FormControl>
+                      <Input {...field} placeholder={`Option ${index + 1}`} />
+                    </FormControl>
+                    {index > 1 && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={() => {
+                          const newOptions = [...form.watch("options")];
+                          newOptions.splice(index, 1);
+                          form.setValue("options", newOptions);
+                        }}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-        ))}
-      </div>
-
-      <div className="space-y-2">
-        <Label>Correct Answer</Label>
-        <RadioGroup
-          value={correctAnswer?.toString()}
-          onValueChange={(value) => setCorrectAnswer(parseInt(value))}
-          className="space-y-2"
-        >
-          {options.map((option, index) => (
-            <div key={index} className="flex items-center space-x-2">
-              <RadioGroupItem value={index.toString()} id={`answer-${index}`} />
-              <Label htmlFor={`answer-${index}`}>{option || `Option ${index + 1}`}</Label>
-            </div>
           ))}
-        </RadioGroup>
-      </div>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              const currentOptions = form.watch("options");
+              form.setValue("options", [...currentOptions, ""]);
+            }}
+          >
+            Add Option
+          </Button>
+        </div>
 
-      <Button
-        type="submit"
-        className="w-full"
-        disabled={isSubmitting || !question || options.some(opt => !opt) || correctAnswer === null}
-      >
-        {isSubmitting ? 'Adding Question...' : 'Add Question'}
-      </Button>
-    </form>
+        <FormField
+          control={form.control}
+          name="answer"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Correct Answer</FormLabel>
+              <FormControl>
+                <select
+                  className="w-full p-2 border rounded-md"
+                  {...field}
+                  onChange={(e) => field.onChange(parseInt(e.target.value))}
+                >
+                  {form.watch("options").map((option, index) => (
+                    <option key={index} value={index}>
+                      Option {index + 1}: {option || '(empty)'}
+                    </option>
+                  ))}
+                </select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <Button type="submit" className="w-full">
+          Add Question
+        </Button>
+      </form>
+    </Form>
   );
 }

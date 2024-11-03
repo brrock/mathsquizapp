@@ -1,11 +1,13 @@
 import { BrainCog } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ModeToggle } from '@/components/theme-toggler';
 
 export default function Home() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100 dark:from-neutral-950 dark:to-neutral-900">
+      <div className="top-left"><ModeToggle /></div>
       <div className="container mx-auto px-4 py-16">
         <Card className="max-w-2xl mx-auto">
           <CardHeader className="text-center">
@@ -19,11 +21,6 @@ export default function Home() {
             <Link href="/quiz" className="w-full max-w-xs">
               <Button className="w-full" size="lg">
                 Start Quiz
-              </Button>
-            </Link>
-            <Link href="/admin" className="w-full max-w-xs">
-              <Button variant="outline" className="w-full" size="lg">
-                Admin Panel
               </Button>
             </Link>
           </CardContent>

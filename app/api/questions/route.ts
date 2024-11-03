@@ -1,17 +1,12 @@
 import { prisma } from '@/lib/db';
 import { NextResponse } from 'next/server';
-import { headers } from 'next/headers';
-
-const ALLOWED_IPS = ['2.222.86.36']; // Add your IP addresses
-
-async function checkIP(ip: string) {
-  return ALLOWED_IPS.includes(ip);
-}
 
 export async function GET() {
   try {
     const questions = await prisma.question.findMany();
-    return NextResponse.json(questions);
+    // Shuffle questions using Fisher-Yates algorithm
+    const shuffledQuestions = [...questions].sort(() => Math.random() - 0.5);
+    return NextResponse.json(shuffledQuestions);
   } catch (error) {
     console.error('Failed to fetch questions:', error);
     return NextResponse.json(
@@ -22,10 +17,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const headersList = headers();
-  const ip = (await headersList).get('x-forwarded-for') || '127.0.0.1';
-
-  if (!await checkIP(ip)) {
+  if (process.env.NODE_ENV === 'production') {
     return NextResponse.json(
       { error: 'Unauthorized' },
       { status: 403 }
@@ -34,7 +26,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { question, options, answer } = body;
+    const { question, options, answer, imageUrl } = body;
 
     if (!question || !options || answer === undefined || options.length === 0) {
       return NextResponse.json(
@@ -48,6 +40,7 @@ export async function POST(request: Request) {
         question,
         options,
         answer,
+        imageUrl: imageUrl || null,
       },
     });
 
