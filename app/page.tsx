@@ -14,7 +14,7 @@ export default function Home() {
             <div className="flex justify-center mb-4">
               <BrainCog className="h-12 w-12 text-primary" />
             </div>
-            <CardTitle className="text-4xl font-bold tracking-tight">Welcome to The maths quiz</CardTitle>
+            <CardTitle className="text-4xl font-bold tracking-tight">Welcome to the maths quiz</CardTitle>
            
           </CardHeader>
           <CardContent className="flex flex-col gap-4 items-center">
