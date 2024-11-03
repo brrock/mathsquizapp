@@ -9,7 +9,8 @@ import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { ModeToggle } from '@/components/theme-toggler';
 import Image from 'next/image';
-
+// make dynamic so we dont have to redepoly
+export const dynamic = 'force-dynamic'
 interface Question {
   id: string;
   question: string;
