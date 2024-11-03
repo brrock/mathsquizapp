@@ -7,12 +7,17 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
+import { ModeToggle } from '@/components/theme-toggler';
+import Image from 'next/image';
 
 interface Question {
   id: string;
   question: string;
   options: string[];
   answer: number;
+  imageUrl?: string; // Changed from image to imageUrl
+  createdAt: string;
+  updatedAt: string;
 }
 
 export default function QuizPage() {
@@ -65,7 +70,7 @@ export default function QuizPage() {
 
   if (questions.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-neutral-50 to-neutral-100 dark:from-neutral-950 dark:to-neutral-900">
         <Card className="w-full max-w-2xl mx-4">
           <CardContent className="py-8">
             <div className="flex justify-center">
@@ -89,6 +94,13 @@ export default function QuizPage() {
           </CardHeader>
           <CardContent className="py-8">
             <Progress value={(score / questions.length) * 100} className="w-full h-4" />
+            <p className="text-center mt-4 text-muted-foreground">
+              {score === questions.length 
+                ? "Perfect score! Outstanding!" 
+                : score >= questions.length * 0.7 
+                  ? "Great job! Keep it up!" 
+                  : "Good effort! Try again to improve your score!"}
+            </p>
           </CardContent>
           <CardFooter className="flex justify-center">
             <Button onClick={() => window.location.reload()} className="w-full max-w-xs">
@@ -102,6 +114,9 @@ export default function QuizPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-neutral-50 to-neutral-100 dark:from-neutral-950 dark:to-neutral-900">
+      <div className="absolute top-4 right-4">
+        <ModeToggle />
+      </div>
       <Card className="w-full max-w-2xl mx-4">
         <CardHeader>
           <div className="flex justify-between items-center mb-4">
@@ -111,23 +126,44 @@ export default function QuizPage() {
           <Progress value={(currentQuestion / questions.length) * 100} className="mb-4" />
           <CardTitle className="text-2xl">{questions[currentQuestion].question}</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-6">
+          {questions[currentQuestion].imageUrl && (
+            <div className="relative w-full h-60 rounded-lg overflow-hidden">
+              <Image
+                src={questions[currentQuestion].imageUrl}
+                alt="Question image"
+                fill
+                className="object-contain bg-neutral-100 dark:bg-neutral-900"
+                priority
+                onError={(e) => {
+                  console.error('Image failed to load:', e);
+                  const target = e.target as HTMLElement;
+                  if (target.parentElement) {
+                    target.parentElement.style.display = 'none';
+                  }
+                }}
+              />
+            </div>
+          )}
           <RadioGroup
             value={selectedAnswer?.toString()}
             onValueChange={(value) => setSelectedAnswer(parseInt(value))}
             className="space-y-4"
           >
             {questions[currentQuestion].options.map((option, index) => (
-              <div key={index} className="flex items-center space-x-2">
+              <div 
+                key={index} 
+                className="flex items-center space-x-2 p-4 rounded-lg border border-input hover:bg-accent hover:text-accent-foreground transition-colors"
+              >
                 <RadioGroupItem value={index.toString()} id={`option-${index}`} />
-                <Label htmlFor={`option-${index}`} className="text-lg">
+                <Label htmlFor={`option-${index}`} className="text-lg cursor-pointer w-full">
                   {option}
                 </Label>
               </div>
             ))}
           </RadioGroup>
         </CardContent>
-        <CardFooter>
+        <CardFooter className="flex gap-4">
           <Button
             onClick={handleAnswer}
             disabled={selectedAnswer === null}
