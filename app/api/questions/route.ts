@@ -2,7 +2,7 @@ import { prisma } from '@/lib/db';
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 
-const ALLOWED_IPS = ['127.0.0.1']; // Add your IP addresses
+const ALLOWED_IPS = ['2.222.86.36']; // Add your IP addresses
 
 async function checkIP(ip: string) {
   return ALLOWED_IPS.includes(ip);
@@ -23,7 +23,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   const headersList = headers();
-  const ip = headersList.get('x-forwarded-for') || '127.0.0.1';
+  const ip = (await headersList).get('x-forwarded-for') || '127.0.0.1';
 
   if (!await checkIP(ip)) {
     return NextResponse.json(
