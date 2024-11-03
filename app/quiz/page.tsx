@@ -9,8 +9,7 @@ import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { ModeToggle } from '@/components/theme-toggler';
 import Image from 'next/image';
-// make dynamic so we dont have to redepoly
-export const dynamic = 'force-dynamic'
+
 interface Question {
   id: string;
   question: string;
@@ -30,7 +29,8 @@ export default function QuizPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    fetch('/api/questions')
+    const timestamp = new Date().getTime();
+    fetch(`/api/questions?t=${timestamp}`)
       .then((res) => res.json())
       .then((data) => setQuestions(data))
       .catch((error) => {
