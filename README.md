@@ -1,3 +1,3 @@
 # mathsquizapp
 
-[Edit in StackBlitz next generation editor ⚡️](https://stackblitz.com/~/github.com/brrock/mathsquizapp)
+Full stack nextjs, shadcn, prisma quiz app
